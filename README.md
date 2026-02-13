@@ -69,6 +69,12 @@ Run the test suite to verify the numerical stability of decompositions:
 cargo test --tests
 ```
 
+Run the benchmark to see SVD speed:
+
+```bash
+cargo bench
+```
+
 ## License
 
 MIT
