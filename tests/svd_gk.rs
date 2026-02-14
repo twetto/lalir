@@ -234,3 +234,41 @@ fn test_gk_10x10() {
     let err = (recon - a).norm_fro();
     assert!(err < 1e-4, "10x10 GK reconstruction error: {}", err);
 }
+
+// ============================================================
+// Convergence diagnostics
+// ============================================================
+
+#[test]
+fn test_gk_converges_quickly() {
+    use lalir::svd_gk::svd_golub_kahan_detail;
+
+    let a = Matrix::<3, 3>::from_slice(&[
+        12.0, -51.0,   4.0,
+         6.0, 167.0, -68.0,
+        -4.0,  24.0, -41.0,
+    ]);
+    let r = svd_golub_kahan_detail(&a);
+    assert!(r.converged, "3x3 did not converge");
+    // Should converge in far fewer than max_iter * N = 300
+    assert!(r.iterations < 30,
+        "3x3 took {} iterations (expected < 30)", r.iterations);
+
+    let a10 = Matrix::<10, 10>::from_slice(&[
+         2.0,  5.0, -10.0,  -7.0,  -7.0,  -3.0,  -1.0,   9.0,   8.0,  -6.0,
+        -4.0,  2.0,  -9.0,  -4.0,  -3.0,   4.0,   7.0,  -5.0,   3.0,  -2.0,
+        -1.0, 10.0,   9.0,   6.0,   9.0,  -5.0,   5.0,   5.0, -10.0,   8.0,
+        -7.0,  7.0,   9.0,   9.0,   9.0,   4.0,  -3.0, -10.0,  -9.0,  -1.0,
+       -10.0,  0.0,  10.0,  -7.0,   1.0,   8.0,  -8.0, -10.0, -10.0,  -6.0,
+        -5.0, -4.0,  -2.0,  10.0,   7.0,   5.0,  -6.0,  -1.0,   0.0,  -9.0,
+        -9.0, -3.0,  -1.0,  -7.0,  -4.0,   1.0,   4.0,   8.0, -10.0,   4.0,
+        -7.0,  2.0,   0.0,  10.0,   1.0,  -6.0,  -4.0,  -6.0,   5.0,  10.0,
+        -7.0,  2.0,  -6.0,  10.0,  -2.0,   4.0,   5.0,  10.0,  -7.0,   5.0,
+         3.0,  6.0,   7.0,  -5.0,  -1.0,  -7.0, -10.0,  -5.0, -10.0,   7.0,
+    ]);
+    let r10 = svd_golub_kahan_detail(&a10);
+    assert!(r10.converged, "10x10 did not converge");
+    // Should converge in far fewer than max_iter * N = 1000
+    assert!(r10.iterations < 100,
+        "10x10 took {} iterations (expected < 100)", r10.iterations);
+}
